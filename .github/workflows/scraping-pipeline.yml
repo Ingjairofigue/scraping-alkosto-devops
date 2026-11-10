@@ -1,0 +1,34 @@
+name: Pipeline de Scraping Alkosto
+
+on:
+  push:
+    branches: [ main, feature/ci-cd-pipeline ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  ejecutar-scraping:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout del código
+        uses: actions/checkout@v4
+
+      - name: Configurar Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.10'
+
+      - name: Instalar dependencias
+        run: |
+          pip install requests beautifulsoup4 selenium pandas scrapy google-colab-selenium
+
+      - name: Ejecutar el notebook (Prueba automatizada)
+        run: |
+          # Aquí ejecutamos el notebook. Si falla, el pipeline se detiene (prueba fallida).
+          jupyter nbconvert --to notebook --execute "Figueredo_Jairo_Analizando_EA1.ipynb" --output "notebook_ejecutado.ipynb" --ExecutePreprocessor.timeout=600
+
+      - name: Subir el CSV como Artifact (Despliegue)
+        uses: actions/upload-artifact@v4
+        with:
+          name: datos-alkosto-csv
+          path: alkosto_celulares.csv
